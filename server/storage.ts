@@ -1,37 +1,50 @@
-import { type User, type InsertUser } from "@shared/schema";
+import { type Intent, type Transaction } from "@shared/schema";
 import { randomUUID } from "crypto";
 
-// modify the interface with any CRUD methods
-// you might need
-
+// Storage interface for IntentMesh
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getIntent(id: string): Promise<Intent | undefined>;
+  createIntent(intent: Omit<Intent, 'id'>): Promise<Intent>;
+  getIntents(): Promise<Intent[]>;
+  updateIntent(id: string, updates: Partial<Intent>): Promise<Intent | undefined>;
+  deleteIntent(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+  private intents: Map<string, Intent>;
+  private transactions: Map<string, Transaction>;
 
   constructor() {
-    this.users = new Map();
+    this.intents = new Map();
+    this.transactions = new Map();
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getIntent(id: string): Promise<Intent | undefined> {
+    return this.intents.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createIntent(intentData: Omit<Intent, 'id'>): Promise<Intent> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    const intent: Intent = { ...intentData, id };
+    this.intents.set(id, intent);
+    return intent;
+  }
+
+  async getIntents(): Promise<Intent[]> {
+    return Array.from(this.intents.values());
+  }
+
+  async updateIntent(id: string, updates: Partial<Intent>): Promise<Intent | undefined> {
+    const existing = this.intents.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...updates };
+    this.intents.set(id, updated);
+    return updated;
+  }
+
+  async deleteIntent(id: string): Promise<boolean> {
+    return this.intents.delete(id);
   }
 }
 

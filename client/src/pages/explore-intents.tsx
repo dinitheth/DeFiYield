@@ -189,14 +189,14 @@ export default function ExploreIntents() {
                 From Token
               </label>
               <Select
-                value={filters.fromToken}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, fromToken: value }))}
+                value={filters.fromToken || "all"}
+                onValueChange={(value) => setFilters(prev => ({ ...prev, fromToken: value === "all" ? "" : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All tokens" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All tokens</SelectItem>
+                  <SelectItem value="all">All tokens</SelectItem>
                   {SUPPORTED_TOKENS.map((token) => (
                     <SelectItem key={token.symbol} value={token.symbol}>
                       {token.symbol}
@@ -211,14 +211,14 @@ export default function ExploreIntents() {
                 To Token
               </label>
               <Select
-                value={filters.toToken}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, toToken: value }))}
+                value={filters.toToken || "all"}
+                onValueChange={(value) => setFilters(prev => ({ ...prev, toToken: value === "all" ? "" : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All tokens" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All tokens</SelectItem>
+                  <SelectItem value="all">All tokens</SelectItem>
                   {SUPPORTED_TOKENS.map((token) => (
                     <SelectItem key={token.symbol} value={token.symbol}>
                       {token.symbol}
@@ -233,14 +233,14 @@ export default function ExploreIntents() {
                 Amount Range
               </label>
               <Select
-                value={filters.amountRange}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, amountRange: value }))}
+                value={filters.amountRange || "any"}
+                onValueChange={(value) => setFilters(prev => ({ ...prev, amountRange: value === "any" ? "" : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Any amount" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any amount</SelectItem>
+                  <SelectItem value="any">Any amount</SelectItem>
                   <SelectItem value="small">{"< 100"}</SelectItem>
                   <SelectItem value="medium">100 - 1,000</SelectItem>
                   <SelectItem value="large">{"> 1,000"}</SelectItem>
