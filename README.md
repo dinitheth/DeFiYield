@@ -24,5 +24,3 @@ IntentMesh is a production-grade decentralized application that enables users to
 - **Auto-Matching**: Discover compatible trades automatically
 - **Flexible Execution**: Support for partial fills and custom parameters
 
-## Architecture
-
