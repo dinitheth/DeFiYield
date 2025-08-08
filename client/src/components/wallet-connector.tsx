@@ -54,24 +54,13 @@ export function WalletConnector() {
   }
 
   return (
-    <div className="flex flex-col items-end space-y-2">
-      <Button
-        onClick={connect}
-        disabled={isConnecting}
-        className="gradient-border"
-      >
-        <div className="gradient-border-inner px-4 py-2 flex items-center space-x-2">
-          <Wallet className="w-4 h-4" />
-          <span>{isConnecting ? "Connecting..." : "Connect Wallet"}</span>
-        </div>
-      </Button>
-      
-      {error && (
-        <div className="flex items-center space-x-1 text-destructive text-xs">
-          <AlertCircle className="w-3 h-3" />
-          <span>Keychain not found</span>
-        </div>
-      )}
-    </div>
+    <Button
+      onClick={connect}
+      disabled={isConnecting}
+      className="bg-primary hover:bg-primary/90 text-primary-foreground"
+    >
+      <Wallet className="w-4 h-4 mr-2" />
+      <span>{isConnecting ? "Connecting..." : "Connect Keychain"}</span>
+    </Button>
   );
 }

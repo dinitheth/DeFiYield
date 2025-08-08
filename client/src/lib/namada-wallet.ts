@@ -37,7 +37,7 @@ export class NamadaWallet {
 
     try {
       const accounts = await window.namada.connect();
-      if (accounts.length === 0) {
+      if (!accounts || !Array.isArray(accounts) || accounts.length === 0) {
         throw new Error("No accounts found in Namada Keychain");
       }
 

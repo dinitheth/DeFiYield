@@ -1,10 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { PlusCircle, Search, Shield, Cpu, Coins, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { fetchRealTimeStats } from "@/lib/real-data";
 
 export default function Home() {
+  const [stats, setStats] = useState({
+    activeIntents: 156,
+    volumeMatched: '$2.1M',
+    shieldedTransfers: 100
+  });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const realTimeStats = await fetchRealTimeStats();
+        setStats({
+          activeIntents: realTimeStats.activeIntents,
+          volumeMatched: realTimeStats.volumeMatched,
+          shieldedTransfers: realTimeStats.shieldedTransfers
+        });
+      } catch (error) {
+        console.warn('Using fallback stats due to:', error);
+      }
+    };
+
+    loadStats();
+    // Update stats every 5 minutes
+    const interval = setInterval(loadStats, 300000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -22,7 +49,7 @@ export default function Home() {
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-              Create and fulfill decentralized trade intents using Anoma-style logic with complete privacy via Namada's shielded transfers.
+              Create and fulfill decentralized trade intents
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
@@ -48,15 +75,15 @@ export default function Home() {
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               <div className="text-center animate-slide-up">
-                <div className="text-3xl font-bold text-primary mb-2">156</div>
+                <div className="text-3xl font-bold text-primary mb-2">{stats.activeIntents}</div>
                 <div className="text-sm text-muted-foreground">Active Intents</div>
               </div>
               <div className="text-center animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                <div className="text-3xl font-bold text-primary mb-2">$2.1M</div>
+                <div className="text-3xl font-bold text-primary mb-2">{stats.volumeMatched}</div>
                 <div className="text-sm text-muted-foreground">Volume Matched</div>
               </div>
               <div className="text-center animate-slide-up" style={{ animationDelay: "0.2s" }}>
-                <div className="text-3xl font-bold text-primary mb-2">100%</div>
+                <div className="text-3xl font-bold text-primary mb-2">{stats.shieldedTransfers}%</div>
                 <div className="text-sm text-muted-foreground">Shielded Transfers</div>
               </div>
             </div>
@@ -69,11 +96,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Anoma-Style Intent Architecture
+              With Anoma Intent Architecture
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              70% local-first logic, 30% Namada execution. Complete privacy with MASP shielded transfers.
-            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
