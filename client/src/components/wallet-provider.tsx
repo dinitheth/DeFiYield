@@ -51,24 +51,51 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Check connection status on mount
+  // Check connection status on mount and listen for account changes
   useEffect(() => {
     const checkConnection = async () => {
       try {
         const isAvailable = await wallet.isAvailable();
-        if (isAvailable) {
-          const walletAddress = await wallet.getAddress();
-          if (walletAddress) {
-            setAddress(walletAddress);
-            setIsConnected(true);
+        if (isAvailable && window.namada) {
+          // Check if already connected
+          try {
+            const isConnected = await window.namada.isConnected();
+            if (isConnected) {
+              const walletAddress = await wallet.getAddress();
+              if (walletAddress) {
+                setAddress(walletAddress);
+                setIsConnected(true);
+              }
+            }
+          } catch (err) {
+            console.warn("Failed to check connection status:", err);
           }
         }
       } catch (err) {
-        console.warn("Failed to check wallet connection:", err);
+        console.warn("Failed to check wallet availability:", err);
       }
     };
 
     checkConnection();
+
+    // Listen for Namada Keychain events
+    const handleAccountChange = () => {
+      console.log("Account changed, reconnecting...");
+      checkConnection();
+    };
+
+    // Add event listeners if available
+    if (typeof window !== "undefined" && window.addEventListener) {
+      window.addEventListener("namada_accountChanged", handleAccountChange);
+      window.addEventListener("namada_connect", handleAccountChange);
+    }
+
+    return () => {
+      if (typeof window !== "undefined" && window.removeEventListener) {
+        window.removeEventListener("namada_accountChanged", handleAccountChange);
+        window.removeEventListener("namada_connect", handleAccountChange);
+      }
+    };
   }, []);
 
   const value: WalletContextType = {

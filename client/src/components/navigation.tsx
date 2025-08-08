@@ -1,14 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Shield, Sun, Moon, Menu, X } from "lucide-react";
+import { Shield, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "./theme-provider";
+import { ThemeToggle } from "./theme-toggle";
 import { WalletConnector } from "./wallet-connector";
-import { useState } from "react";
 
 export function Navigation() {
   const [location] = useLocation();
-  const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -55,17 +53,7 @@ export function Navigation() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
-              {theme === "dark" ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-            </Button>
+            <ThemeToggle />
             <WalletConnector />
           </div>
 
@@ -105,23 +93,7 @@ export function Navigation() {
               </Link>
             ))}
             <div className="flex items-center justify-between pt-4 border-t border-border">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {theme === "dark" ? (
-                  <>
-                    <Sun className="w-4 h-4 mr-2" />
-                    Light
-                  </>
-                ) : (
-                  <>
-                    <Moon className="w-4 h-4 mr-2" />
-                    Dark
-                  </>
-                )}
-              </Button>
+              <ThemeToggle />
               <WalletConnector />
             </div>
           </div>

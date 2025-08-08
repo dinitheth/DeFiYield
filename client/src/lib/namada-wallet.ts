@@ -4,11 +4,14 @@ declare global {
     namada?: {
       connect: () => Promise<string[]>;
       isConnected: () => Promise<boolean>;
-      getAddress: () => Promise<string>;
+      accounts: () => Promise<string[]>;
+      defaultAccount: () => Promise<string | null>;
       signTx: (tx: any) => Promise<string>;
       submitTx: (signedTx: string) => Promise<string>;
       getBalance: (address: string, token: string) => Promise<string>;
+      version: () => Promise<string>;
     };
+    keplr?: any;
   }
 }
 
@@ -27,7 +30,31 @@ export class NamadaWallet {
   }
 
   async isAvailable(): Promise<boolean> {
-    return typeof window !== "undefined" && !!window.namada;
+    if (typeof window === "undefined") return false;
+    
+    // Check if Namada Keychain extension is installed
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => resolve(false), 1000);
+      
+      const checkForNamada = () => {
+        if (window.namada) {
+          clearTimeout(timeout);
+          resolve(true);
+        }
+      };
+      
+      checkForNamada();
+      
+      // Keep checking for a short period as extensions load asynchronously
+      const interval = setInterval(() => {
+        checkForNamada();
+        if (window.namada) {
+          clearInterval(interval);
+        }
+      }, 100);
+      
+      setTimeout(() => clearInterval(interval), 1000);
+    });
   }
 
   async connect(): Promise<string> {
@@ -36,16 +63,30 @@ export class NamadaWallet {
     }
 
     try {
+      // Try to connect and get accounts
       const accounts = await window.namada.connect();
+      
       if (!accounts || !Array.isArray(accounts) || accounts.length === 0) {
-        throw new Error("No accounts found in Namada Keychain");
+        // Fallback: try to get accounts directly
+        try {
+          const directAccounts = await window.namada.accounts();
+          if (!directAccounts || directAccounts.length === 0) {
+            throw new Error("No accounts found in Namada Keychain. Please create an account first.");
+          }
+          this.address = directAccounts[0];
+        } catch {
+          throw new Error("No accounts found in Namada Keychain. Please create an account first.");
+        }
+      } else {
+        this.address = accounts[0];
       }
 
-      this.address = accounts[0];
       this.connected = true;
       return this.address;
     } catch (error) {
       console.error("Failed to connect to Namada Keychain:", error);
+      this.connected = false;
+      this.address = null;
       throw error;
     }
   }
@@ -56,15 +97,28 @@ export class NamadaWallet {
   }
 
   async getAddress(): Promise<string | null> {
-    if (!this.connected || !window.namada) {
+    if (!window.namada) {
       return null;
     }
 
     try {
-      return await window.namada.getAddress();
+      // Try multiple methods to get the address
+      if (window.namada.defaultAccount) {
+        const defaultAddr = await window.namada.defaultAccount();
+        if (defaultAddr) return defaultAddr;
+      }
+      
+      if (window.namada.accounts) {
+        const accounts = await window.namada.accounts();
+        if (accounts && accounts.length > 0) {
+          return accounts[0];
+        }
+      }
+
+      return this.address;
     } catch (error) {
       console.error("Failed to get address:", error);
-      return null;
+      return this.address;
     }
   }
 
